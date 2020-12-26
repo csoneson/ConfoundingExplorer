@@ -23,3 +23,5 @@ library(ConfoundingExplorer)
 ConfoundingExplorer()
 ```
 
+The button `Data description` in the lower left corner provides more details about the data generation and the different analysis approaches implemented in the app. 
+
