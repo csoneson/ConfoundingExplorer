@@ -174,8 +174,7 @@ ConfoundingExplorer <- function() {
                 } else if (analysisapproach == "Remove batch effect in advance,\n, accounting for condition") {
                     l0 <- stats::lm(m[i, ] ~ cond)
                     l1 <- stats::lm(stats::residuals(l0) ~ batch)
-                    m0 <- stats::predict(l0) + stats::residuals(l1) +
-                        stats::coefficients(l0)["(Intercept)"]
+                    m0 <- stats::predict(l0) + stats::residuals(l1)
                     l <- stats::lm(m0 ~ cond)
                 } else {
                     stop("Not implemented")
@@ -200,13 +199,18 @@ ConfoundingExplorer <- function() {
         shiny::observeEvent(input$datadesc, {
             shiny::showModal(shiny::modalDialog(
                 title = "Data generation",
-                shiny::renderUI(shiny::HTML(readLines(
-                    system.file("extdata/dataDescription.html",
-                                package = "ConfoundingExplorer")))),
+                shiny::includeHTML(system.file("extdata/dataDescription.html",
+                                               package = "ConfoundingExplorer")),
+                # shiny::renderUI(shiny::HTML(readLines(
+                #     system.file("extdata/dataDescription.html",
+                #                 package = "ConfoundingExplorer")))),
+                # shiny::HTML(readLines(
+                #     system.file("extdata/dataDescription.html",
+                #                 package = "ConfoundingExplorer"))),
                 # shiny::includeMarkdown(),
                 easyClose = TRUE
             ))
-        })
+        }, ignoreNULL = TRUE, ignoreInit = TRUE)
 
         ## Generate data
         datres <- shiny::reactiveValues()
