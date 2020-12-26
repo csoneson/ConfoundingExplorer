@@ -101,7 +101,9 @@ ConfoundingExplorer <- function() {
 
             shiny::numericInput(
                 "seed", "Random seed", 123, min = 1, max = 1e8
-            )
+            ),
+
+            shiny::actionButton("datadesc", "Data description")
         ),
 
         body = shinydashboard::dashboardBody(
@@ -193,6 +195,18 @@ ConfoundingExplorer <- function() {
     }
 
     server <- function(input, output, session) {
+
+        ## Display data generation description
+        shiny::observeEvent(input$datadesc, {
+            shiny::showModal(shiny::modalDialog(
+                title = "Data generation",
+                shiny::renderUI(shiny::HTML(readLines(
+                    system.file("extdata/dataDescription.html",
+                                package = "ConfoundingExplorer")))),
+                # shiny::includeMarkdown(),
+                easyClose = TRUE
+            ))
+        })
 
         ## Generate data
         datres <- shiny::reactiveValues()
