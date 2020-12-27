@@ -48,7 +48,7 @@
                 l0 <- stats::lm(m[i, ] ~ batch)
                 m0 <- stats::residuals(l0) + stats::coefficients(l0)["(Intercept)"]
                 l <- stats::lm(m0 ~ cond)
-            } else if (analysisapproach == "Remove batch effect in advance,\n, accounting for condition") {
+            } else if (analysisapproach == "Remove batch effect in advance,\naccounting for condition") {
                 l0 <- stats::lm(m[i, ] ~ cond)
                 l1 <- stats::lm(stats::residuals(l0) ~ batch)
                 m0 <- stats::predict(l0) + stats::residuals(l1)

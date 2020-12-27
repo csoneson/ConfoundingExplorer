@@ -11,7 +11,7 @@
 #'   geom_histogram
 #' @importFrom iSEE jitterSquarePoints
 #' @importFrom iCOBRA COBRAData calculate_adjp calculate_performance
-#'   prepare_data_for_plot plot_fpr plot_tpr
+#'   fdrtpr fpr
 #' @importFrom cowplot plot_grid
 #' @importFrom shinydashboard dashboardPage dashboardHeader dashboardSidebar
 #'   menuItem dashboardBody box
@@ -94,7 +94,7 @@ ConfoundingExplorer <- function() {
                             "Include batch effect in model",
                             "Remove batch effect in advance",
                             paste0("Remove batch effect in advance,",
-                                   "\n, accounting for condition")),
+                                   "\naccounting for condition")),
                 selected = "Include batch effect in model"
             ),
 
@@ -121,6 +121,16 @@ ConfoundingExplorer <- function() {
                         title = "P-value histogram (Condition effect)",
                         width = NULL,
                         shiny::plotOutput("pvalHist")
+                    )
+                )
+            ),
+            shiny::fluidRow(
+                shiny::column(
+                    width = 12,
+                    shinydashboard::box(
+                        title = "Summary",
+                        width = NULL,
+                        shiny::textOutput("summaryRates")
                     )
                 )
             ),
@@ -235,8 +245,8 @@ ConfoundingExplorer <- function() {
                     aes(x = jitteredX, y = jitteredY, color = padj < 0.05),
                     alpha = 1, tmp, size = 2
                 ) +
-                ggplot2::labs(x = "Affected by condition",
-                              y = "Affected by batch") +
+                ggplot2::labs(x = "Variable affected by condition",
+                              y = "Variable affected by batch") +
                 ggplot2::scale_x_discrete(drop = FALSE) +
                 ggplot2::scale_y_discrete(drop = FALSE) +
                 ggplot2::scale_color_manual(
@@ -267,7 +277,7 @@ ConfoundingExplorer <- function() {
                                axis.title = element_text(size = 15))
         })
 
-        output$precRecPlot <- shiny::renderPlot({
+        output$summaryRates <- shiny::renderText({
             shiny::validate(
                 shiny::need(any(!is.na(datres$res$pval)),
                             "No valid p-values")
@@ -275,17 +285,21 @@ ConfoundingExplorer <- function() {
             cbd <- iCOBRA::COBRAData(
                 pval = data.frame(mth = datres$res$pval,
                                   row.names = datres$res$feature),
+                padj = data.frame(mth = datres$res$padj,
+                                  row.names = datres$res$feature),
                 truth = data.frame(truth = datres$res$condaff,
                                    row.names = datres$res$feature)
             )
-            cbd <- iCOBRA::calculate_adjp(cbd)
-            cbd <- iCOBRA::calculate_performance(
-                cbd, binary_truth = "truth",
-                aspects = c("fdrtprcurve", "fdrtpr", "fpr", "tpr")
-            )
-            cbd <- iCOBRA::prepare_data_for_plot(cbd)
-            cowplot::plot_grid(iCOBRA::plot_fpr(cbd),
-                               iCOBRA::plot_tpr(cbd))
+            suppressMessages({
+                cbd <- iCOBRA::calculate_performance(
+                    cbd, binary_truth = "truth", thrs = 0.05,
+                    aspects = c("fpr", "fdrtpr")
+                )
+            })
+            paste0("At adj.p threshold = 0.05: TPR = ",
+                   signif(iCOBRA::fdrtpr(cbd)$TPR, digits = 3), ", FDR = ",
+                   signif(iCOBRA::fdrtpr(cbd)$FDR, digits = 3), ", FPR = ",
+                   signif(iCOBRA::fpr(cbd)$FPR, digits = 3))
         })
     }
 
