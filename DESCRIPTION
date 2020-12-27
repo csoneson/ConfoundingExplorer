@@ -6,7 +6,10 @@ Authors@R: c(person("Charlotte", "Soneson", role = c("aut", "cre"),
     email = "charlottesoneson@gmail.com", comment = c(ORCID = "0000-0003-3833-2169")))
 Description: This package provides a simple interactive application for 
     investigating the effect of confounding between a signal of interest 
-    and a batch effect. 
+    and a batch effect. It uses simulated data with user-specified effect
+    sizes for both batch and condition effects. The user can also specify 
+    the number of samples in each condition and batch, and thereby the 
+    degree of confounding. 
 License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true
@@ -20,5 +23,11 @@ Imports:
     ComplexHeatmap,
     shinyMatrix,
     stats,
-    grDevices
+    grDevices,
+    shinyjs,
+    rintrojs
 RoxygenNote: 7.1.1
+biocViews: Regression, ExperimentalDesign, MultipleComparison, BatchEffect
+Suggests: 
+    testthat (>= 3.0.0)
+Config/testthat/edition: 3

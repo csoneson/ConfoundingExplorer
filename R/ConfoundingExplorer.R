@@ -5,7 +5,7 @@
 #' @export
 #'
 #' @importFrom shiny sliderInput radioButtons numericInput fluidRow column
-#'   reactiveValues observe validate need renderPlot shinyApp
+#'   reactiveValues observe validate need renderPlot shinyApp div HTML tags
 #' @importFrom ggplot2 ggplot geom_tile aes geom_point labs scale_x_discrete
 #'   scale_y_discrete scale_color_manual theme_bw theme element_text
 #'   geom_histogram
@@ -18,16 +18,20 @@
 #' @importFrom ComplexHeatmap columnAnnotation rowAnnotation Heatmap
 #' @importFrom shinyMatrix matrixInput
 #' @importFrom grDevices rgb
+#' @importFrom shinyjs useShinyjs onclick
+#' @importFrom rintrojs introjs
 #'
 #' @return A shinyApp object
 #'
 #' @examples
-#' if (interactive) {
+#' if (interactive()) {
 #'   ConfoundingExplorer()
 #' }
+#'
 ConfoundingExplorer <- function() {
     ui <- shinydashboard::dashboardPage(
         skin = "red",
+        shinyjs::useShinyjs(),
 
         # Application title
         header = shinydashboard::dashboardHeader(
@@ -106,11 +110,25 @@ ConfoundingExplorer <- function() {
         ),
 
         body = shinydashboard::dashboardBody(
+            rintrojs::introjsUI(),
+
             shiny::fluidRow(
                 shiny::column(
                     width = 6,
                     shinydashboard::box(
-                        title = "Statistical test results (Condition effect)",
+                        id = "statistical_test_results",
+                        title = shiny::div(
+                            "Statistical test results (Condition effect)",
+                            shiny::HTML("&nbsp;"),
+                            shiny::div(id = "help_statistical_test_results",
+                                       style = "display: inline-block;",
+                                       shiny::tags$i(
+                                           class = "fa fa-question-circle",
+                                           style = "color: lightgrey"
+                                       )
+                            )
+                        ),
+                        # title = "Statistical test results (Condition effect)",
                         width = NULL,
                         shiny::plotOutput("hintonPlot")
                     )
@@ -118,7 +136,19 @@ ConfoundingExplorer <- function() {
                 shiny::column(
                     width = 6,
                     shinydashboard::box(
-                        title = "P-value histogram (Condition effect)",
+                        id = "pvalue_histogram",
+                        title = shiny::div(
+                            "P-value histogram (Condition effect)",
+                            shiny::HTML("&nbsp;"),
+                            shiny::div(id = "help_pvalue_histogram",
+                                       style = "display: inline-block;",
+                                       shiny::tags$i(
+                                           class = "fa fa-question-circle",
+                                           style = "color: lightgrey"
+                                       )
+                            )
+                        ),
+                        # title = "P-value histogram (Condition effect)",
                         width = NULL,
                         shiny::plotOutput("pvalHist")
                     )
@@ -128,7 +158,19 @@ ConfoundingExplorer <- function() {
                 shiny::column(
                     width = 12,
                     shinydashboard::box(
-                        title = "Summary",
+                        id = "summary",
+                        title = shiny::div(
+                            "Summary",
+                            shiny::HTML("&nbsp;"),
+                            shiny::div(id = "help_summary",
+                                       style = "display: inline-block;",
+                                       shiny::tags$i(
+                                           class = "fa fa-question-circle",
+                                           style = "color: lightgrey"
+                                       )
+                            )
+                        ),
+                        # title = "Summary",
                         width = NULL,
                         shiny::textOutput("summaryRates")
                     )
@@ -138,7 +180,19 @@ ConfoundingExplorer <- function() {
                 shiny::column(
                     width = 12,
                     shinydashboard::box(
-                        title = "Data heatmap",
+                        id = "data_heatmap",
+                        title = shiny::div(
+                            "Data heatmap",
+                            shiny::HTML("&nbsp;"),
+                            shiny::div(id = "help_data_heatmap",
+                                       style = "display: inline-block;",
+                                       shiny::tags$i(
+                                           class = "fa fa-question-circle",
+                                           style = "color: lightgrey"
+                                       )
+                            )
+                        ),
+                        # title = "Data heatmap",
                         width = NULL,
                         shiny::plotOutput("heatmapPlot")
                     )
@@ -153,8 +207,10 @@ ConfoundingExplorer <- function() {
         shiny::observeEvent(input$datadesc, {
             shiny::showModal(shiny::modalDialog(
                 title = "Data generation",
-                shiny::includeHTML(system.file("extdata/dataDescription.html",
-                                               package = "ConfoundingExplorer")),
+                shiny::includeHTML(system.file(
+                    "extdata/dataDescription.html",
+                    package = "ConfoundingExplorer")
+                ),
                 # shiny::renderUI(shiny::HTML(readLines(
                 #     system.file("extdata/dataDescription.html",
                 #                 package = "ConfoundingExplorer")))),
@@ -166,7 +222,9 @@ ConfoundingExplorer <- function() {
             ))
         }, ignoreNULL = TRUE, ignoreInit = TRUE)
 
-        ## Generate data
+        ## ----------------------------------------------------------------- ##
+        ## Data generation
+        ## ----------------------------------------------------------------- ##
         datres <- shiny::reactiveValues()
         shiny::observe({
             shiny::validate(
@@ -188,6 +246,9 @@ ConfoundingExplorer <- function() {
             datres$annot <- tmp$annot
         })
 
+        ## ----------------------------------------------------------------- ##
+        ## Data heatmap
+        ## ----------------------------------------------------------------- ##
         output$heatmapPlot <- shiny::renderPlot({
             shiny::validate(
                 shiny::need(!is.null(datres$m) & !is.null(datres$res),
@@ -196,8 +257,10 @@ ConfoundingExplorer <- function() {
             colAnnot <- ComplexHeatmap::columnAnnotation(
                 batch = datres$res$batchaff,
                 cond = datres$res$condaff,
-                col = list(batch = c(`TRUE` = "forestgreen", `FALSE` = "grey85"),
-                           cond = c(`TRUE` = "purple", `FALSE` = "grey85"))
+                col = list(
+                    batch = c(`TRUE` = "forestgreen", `FALSE` = "grey85"),
+                    cond = c(`TRUE` = "purple", `FALSE` = "grey85")
+                )
             )
             rowAnnot <- ComplexHeatmap::rowAnnotation(
                 batch = datres$annot$batch,
@@ -221,9 +284,12 @@ ConfoundingExplorer <- function() {
             )
         })
 
+        ## ----------------------------------------------------------------- ##
+        ## Hinton plot of variables (batch/condition affected, adjp<0.05)
+        ## ----------------------------------------------------------------- ##
         output$hintonPlot <- shiny::renderPlot({
             shiny::validate(
-                shiny::need(any(!is.na(datres$res$pval)),
+                shiny::need(any(!is.na(datres$res$p.val)),
                             "No valid p-values")
             )
             tmp <- datres$res
@@ -242,7 +308,7 @@ ConfoundingExplorer <- function() {
                     summary.data, color = 'black', alpha = 0, size = 0.5
                 ) +
                 ggplot2::geom_point(
-                    aes(x = jitteredX, y = jitteredY, color = padj < 0.05),
+                    aes(x = jitteredX, y = jitteredY, color = p.adj < 0.05),
                     alpha = 1, tmp, size = 2
                 ) +
                 ggplot2::labs(x = "Variable affected by condition",
@@ -262,13 +328,16 @@ ConfoundingExplorer <- function() {
 
         })
 
+        ## ----------------------------------------------------------------- ##
+        ## P-value histogram
+        ## ----------------------------------------------------------------- ##
         output$pvalHist <- shiny::renderPlot({
             shiny::validate(
-                shiny::need(any(!is.na(datres$res$pval)),
+                shiny::need(any(!is.na(datres$res$p.val)),
                             "No valid p-values")
             )
             ggplot2::ggplot(
-                data = data.frame(pval = datres$res$pval), aes(x = pval)
+                data = data.frame(p.val = datres$res$p.val), aes(x = p.val)
             ) +
                 ggplot2::geom_histogram(bins = 50, fill = "lightgrey") +
                 ggplot2::theme_bw() +
@@ -277,15 +346,18 @@ ConfoundingExplorer <- function() {
                                axis.title = element_text(size = 15))
         })
 
+        ## ----------------------------------------------------------------- ##
+        ## Summary (FDP, TPR, FPR)
+        ## ----------------------------------------------------------------- ##
         output$summaryRates <- shiny::renderText({
             shiny::validate(
-                shiny::need(any(!is.na(datres$res$pval)),
+                shiny::need(any(!is.na(datres$res$p.val)),
                             "No valid p-values")
             )
             cbd <- iCOBRA::COBRAData(
-                pval = data.frame(mth = datres$res$pval,
+                pval = data.frame(mth = datres$res$p.val,
                                   row.names = datres$res$feature),
-                padj = data.frame(mth = datres$res$padj,
+                padj = data.frame(mth = datres$res$p.adj,
                                   row.names = datres$res$feature),
                 truth = data.frame(truth = datres$res$condaff,
                                    row.names = datres$res$feature)
@@ -297,12 +369,71 @@ ConfoundingExplorer <- function() {
                 )
             })
             paste0("At adj.p threshold = 0.05: TPR = ",
-                   signif(iCOBRA::fdrtpr(cbd)$TPR, digits = 3), ", FDR = ",
+                   signif(iCOBRA::fdrtpr(cbd)$TPR, digits = 3), ", FDP = ",
                    signif(iCOBRA::fdrtpr(cbd)$FDR, digits = 3), ", FPR = ",
                    signif(iCOBRA::fpr(cbd)$FPR, digits = 3))
         })
+
+        ## ----------------------------------------------------------------- ##
+        ## Help textx
+        ## ----------------------------------------------------------------- ##
+        shinyjs::onclick("help_statistical_test_results", {
+            ptour <- data.frame(
+                element = "#statistical_test_results",
+                intro = paste("This plot shows the number of variables in",
+                              "each category (affected by batch and/or",
+                              "condition). The sizes of the rectangles are",
+                              "proportional to the number of variables in",
+                              "the respective categories. Each dot represents",
+                              "a variable. Variables with an adjusted p-value",
+                              "below 0.05 (testing the null hypothesis that",
+                              "there is no difference between conditions)",
+                              "are colored in red."))
+            rintrojs::introjs(session, options = list(steps = ptour))
+        })
+
+        shinyjs::onclick("help_pvalue_histogram", {
+            ptour <- data.frame(
+                element = "#pvalue_histogram",
+                intro = paste("This plot shows a histogram of the nominal",
+                              "pvalues (testing the null hypothesis that",
+                              "there is no difference between conditions)."))
+            rintrojs::introjs(session, options = list(steps = ptour))
+        })
+
+        shinyjs::onclick("help_summary", {
+            ptour <- data.frame(
+                element = "#summary",
+                intro = paste("This panel summarizes the true positive rate",
+                              "(TPR, power, the fraction of the truly",
+                              "differential variables that are detected as",
+                              "such), the false discovery proportion (FDP,",
+                              "the fraction of the significant variables that",
+                              "are false positives) and the false positive",
+                              "rate (FPR, the fraction of the truly",
+                              "non-differential variables that are called",
+                              "significant) at an imposed adjusted p-value",
+                              "threshold of 0.05."))
+            rintrojs::introjs(session, options = list(steps = ptour))
+        })
+
+        shinyjs::onclick("help_data_heatmap", {
+            ptour <- data.frame(
+                element = "#data_heatmap",
+                intro = paste("This plot provides an overview of the simulated",
+                              "data set. Each row is a sample (the",
+                              "associated condition and batch are indicated),",
+                              "and each column is a variable (the colored bars",
+                              "underneath the plot indicates which variables",
+                              "are truly affected by the condition and batch,",
+                              "respectively)."))
+            rintrojs::introjs(session, options = list(steps = ptour))
+        })
+
     }
 
-    # Generate the application
+    ## ----------------------------------------------------------------- ##
+    ## Generate the app
+    ## ----------------------------------------------------------------- ##
     shiny::shinyApp(ui = ui, server = server)
 }

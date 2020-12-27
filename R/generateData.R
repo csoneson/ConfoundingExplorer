@@ -13,6 +13,10 @@
 #'
 #' @author Charlotte Soneson
 #'
+#' @return A list with three elements: the simulated data matrix (m), the
+#'   results of the statistical test (res) and the sample annotation table
+#'   (annot).
+#'
 #' @importFrom stats rnorm runif lm residuals predict coefficients p.adjust
 #'
 .generateData <- function(nb1c1, nb1c2, nb2c1, nb2c2, fraccond, fracbatch,
@@ -46,9 +50,12 @@
                 l <- stats::lm(m[i, ] ~ batch + cond)
             } else if (analysisapproach == "Remove batch effect in advance") {
                 l0 <- stats::lm(m[i, ] ~ batch)
-                m0 <- stats::residuals(l0) + stats::coefficients(l0)["(Intercept)"]
+                m0 <- stats::residuals(l0) +
+                    stats::coefficients(l0)["(Intercept)"]
                 l <- stats::lm(m0 ~ cond)
-            } else if (analysisapproach == "Remove batch effect in advance,\naccounting for condition") {
+            } else if (analysisapproach == paste0("Remove batch effect in ",
+                                                  "advance,\naccounting for ",
+                                                  "condition")) {
                 l0 <- stats::lm(m[i, ] ~ cond)
                 l1 <- stats::lm(stats::residuals(l0) ~ batch)
                 m0 <- stats::predict(l0) + stats::residuals(l1)
@@ -62,8 +69,8 @@
     res <- data.frame(feature = rownames(m),
                       batchaff = seq_len(nvar) %in% batchvar,
                       condaff = seq_len(nvar) %in% condvar,
-                      pval = pvals,
-                      padj = stats::p.adjust(pvals, method = "BH"),
+                      p.val = pvals,
+                      p.adj = stats::p.adjust(pvals, method = "BH"),
                       row.names = rownames(m))
     annot <- data.frame(sample = colnames(m), batch = batch, cond = cond,
                         row.names = colnames(m))

@@ -13,9 +13,10 @@ A shinyApp object
 Confounding explorer
 }
 \examples{
-if (interactive) {
+if (interactive()) {
   ConfoundingExplorer()
 }
+
 }
 \author{
 Charlotte Soneson

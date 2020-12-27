@@ -33,6 +33,11 @@ batch, respectively}
 
 \item{seed}{Random seed}
 }
+\value{
+A list with three elements: the simulated data matrix (m), the
+  results of the statistical test (res) and the sample annotation table
+  (annot).
+}
 \description{
 Generate data
 }
