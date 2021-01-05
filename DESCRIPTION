@@ -26,7 +26,8 @@ Imports:
     stats,
     grDevices,
     shinyjs,
-    rintrojs
+    rintrojs,
+    limma
 RoxygenNote: 7.1.1
 biocViews: Regression, ExperimentalDesign, MultipleComparison, BatchEffect
 Suggests: 

@@ -18,6 +18,8 @@
 #'   (annot).
 #'
 #' @importFrom stats rnorm runif lm residuals predict coefficients p.adjust
+#'   model.matrix
+#' @importFrom limma removeBatchEffect
 #'
 .generateData <- function(nb1c1, nb1c2, nb2c1, nb2c2, fraccond, fracbatch,
                          condeffect, batcheffect, analysisapproach, nvar,
@@ -43,23 +45,25 @@
             sign((stats::runif(1) < 0.5) - 0.5) * batcheffect
     }
     pvals <- tryCatch({
+        if (analysisapproach == "Remove batch effect in advance") {
+            m0 <- limma::removeBatchEffect(m, batch = batch)
+        } else if (analysisapproach == paste0("Remove batch effect in ",
+                                              "advance,\naccounting for ",
+                                              "condition")) {
+            m0 <- limma::removeBatchEffect(m, batch = batch,
+                                           design = stats::model.matrix(~ cond))
+        }
         vapply(seq_len(nvar), function(i) {
             if (analysisapproach == "Don't account for batch effect") {
                 l <- stats::lm(m[i, ] ~ cond)
             } else if (analysisapproach == "Include batch effect in model") {
                 l <- stats::lm(m[i, ] ~ batch + cond)
             } else if (analysisapproach == "Remove batch effect in advance") {
-                l0 <- stats::lm(m[i, ] ~ batch)
-                m0 <- stats::residuals(l0) +
-                    stats::coefficients(l0)["(Intercept)"]
-                l <- stats::lm(m0 ~ cond)
+                l <- stats::lm(m0[i, ] ~ cond)
             } else if (analysisapproach == paste0("Remove batch effect in ",
                                                   "advance,\naccounting for ",
                                                   "condition")) {
-                l0 <- stats::lm(m[i, ] ~ cond)
-                l1 <- stats::lm(stats::residuals(l0) ~ batch)
-                m0 <- stats::predict(l0) + stats::residuals(l1)
-                l <- stats::lm(m0 ~ cond)
+                l <- stats::lm(m0[i, ] ~ cond)
             } else {
                 stop("Not implemented")
             }
