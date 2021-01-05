@@ -4,7 +4,7 @@
 <!-- badges: start -->
 <!-- badges: end -->
 
-The `ConfoundingExplorer` package provides a simple shiny app for interactively exploring the effect of confounding between the condition of interest and a batch variable, in terms of the ability to correctly find the variables that are truly differential between the different conditions. The illustrations in the app are performed using simulated data. 
+The `ConfoundingExplorer` R package provides a simple shiny app for interactively exploring the effect of confounding between a group variable of interest and a batch variable, in terms of the ability to correctly find the variables that are truly differential between the different levels of the group variable. It is mainly intended for teaching purposes and to illustrate important concepts in experimental design, and all analyses are performed using (quite simplistic) simulated data. 
 
 ## Installation
 
