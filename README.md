@@ -2,6 +2,7 @@
 # ConfoundingExplorer
 
 <!-- badges: start -->
+[![R-CMD-check](https://github.com/csoneson/ConfoundingExplorer/workflows/R-CMD-check/badge.svg)](https://github.com/csoneson/ConfoundingExplorer/actions)
 <!-- badges: end -->
 
 The `ConfoundingExplorer` R package provides a simple shiny app for interactively exploring the effect of confounding between a group variable of interest and a batch variable, in terms of the ability to correctly find the variables that are truly differential between the different levels of the group variable. It is mainly intended for teaching purposes and to illustrate important concepts in experimental design, and all analyses are performed using (quite simplistic) simulated data. 
