@@ -201,6 +201,7 @@ ConfoundingExplorer <- function() {
         )
     )
 
+    #nocov start
     server <- function(input, output, session) {
 
         ## Display data generation description
@@ -431,6 +432,7 @@ ConfoundingExplorer <- function() {
         })
 
     }
+    #nocov end
 
     ## ----------------------------------------------------------------- ##
     ## Generate the app

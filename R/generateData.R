@@ -22,8 +22,8 @@
 #' @importFrom limma removeBatchEffect
 #'
 .generateData <- function(nb1c1, nb1c2, nb2c1, nb2c2, fraccond, fracbatch,
-                         condeffect, batcheffect, analysisapproach, nvar,
-                         seed) {
+                          condeffect, batcheffect, analysisapproach, nvar,
+                          seed) {
     set.seed(seed)
     m <- matrix(stats::rnorm(n = (nb1c1 + nb1c2 + nb2c1 + nb2c2) * nvar,
                              mean = 10, sd = 2),
@@ -69,7 +69,7 @@
             }
             summary(l)$coef["condC2", "Pr(>|t|)"]
         }, NA_real_)},
-        error = function(e) rep(NA, nvar))
+        error = function(e) rep(NA_real_, nvar))
     res <- data.frame(feature = rownames(m),
                       batchaff = seq_len(nvar) %in% batchvar,
                       condaff = seq_len(nvar) %in% condvar,
