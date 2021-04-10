@@ -83,7 +83,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">ConfoundingExplorer</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.1.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.2.0</span>
       </span>
     </div>
 
@@ -117,8 +117,48 @@
     <p>Confounding explorer</p>
     </div>
 
-    <pre class="usage"><span class='fu'>ConfoundingExplorer</span><span class='op'>(</span><span class='op'>)</span></pre>
+    <pre class="usage"><span class='fu'>ConfoundingExplorer</span><span class='op'>(</span>
+  sampleSizes <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/matrix.html'>matrix</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/rep.html'>rep</a></span><span class='op'>(</span><span class='fl'>5</span>, <span class='fl'>4</span><span class='op'>)</span>, nrow <span class='op'>=</span> <span class='fl'>2</span>, dimnames <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"group1"</span>, <span class='st'>"group2"</span><span class='op'>)</span>,
+    <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"batch1"</span>, <span class='st'>"batch2"</span><span class='op'>)</span><span class='op'>)</span><span class='op'>)</span>,
+  fracVarCond <span class='op'>=</span> <span class='fl'>0.25</span>,
+  fracVarBatch <span class='op'>=</span> <span class='fl'>0.5</span>,
+  condEffectSize <span class='op'>=</span> <span class='fl'>3</span>,
+  batchEffectSize <span class='op'>=</span> <span class='fl'>3</span>,
+  analysisApproach <span class='op'>=</span> <span class='st'>"dontAdjust"</span>,
+  seed <span class='op'>=</span> <span class='fl'>123</span>
+<span class='op'>)</span></pre>
 
+    <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
+    <table class="ref-arguments">
+    <colgroup><col class="name" /><col class="desc" /></colgroup>
+    <tr>
+      <th>sampleSizes</th>
+      <td><p>2x2 numeric matrix giving the number of samples in each
+group. Row names must be c('group1', 'group2') and column names must be
+c('batch1', 'batch2').</p></td>
+    </tr>
+    <tr>
+      <th>fracVarCond, fracVarBatch</th>
+      <td><p>Numeric scalars between 0 and 1.
+The fraction of variables affected by the condition effect and batch
+effect, respectively.</p></td>
+    </tr>
+    <tr>
+      <th>condEffectSize, batchEffectSize</th>
+      <td><p>Numeric scalars. The condition and
+batch effect size, respectively.</p></td>
+    </tr>
+    <tr>
+      <th>analysisApproach</th>
+      <td><p>Character scalar. One of 'dontAdjust', 'inclBatch',
+'removeBatch', 'removeBatchAccCond'. Determines what model is fit to the
+data.</p></td>
+    </tr>
+    <tr>
+      <th>seed</th>
+      <td><p>Numeric scalar, the random seed to use when simulating data.</p></td>
+    </tr>
+    </table>
 
     <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
 
