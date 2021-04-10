@@ -4,7 +4,34 @@
 \alias{ConfoundingExplorer}
 \title{Confounding explorer}
 \usage{
-ConfoundingExplorer()
+ConfoundingExplorer(
+  sampleSizes = matrix(rep(5, 4), nrow = 2, dimnames = list(c("group1", "group2"),
+    c("batch1", "batch2"))),
+  fracVarCond = 0.25,
+  fracVarBatch = 0.5,
+  condEffectSize = 3,
+  batchEffectSize = 3,
+  analysisApproach = "dontAdjust",
+  seed = 123
+)
+}
+\arguments{
+\item{sampleSizes}{2x2 numeric matrix giving the number of samples in each
+group. Row names must be c('group1', 'group2') and column names must be
+c('batch1', 'batch2').}
+
+\item{fracVarCond, fracVarBatch}{Numeric scalars between 0 and 1.
+The fraction of variables affected by the condition effect and batch
+effect, respectively.}
+
+\item{condEffectSize, batchEffectSize}{Numeric scalars. The condition and
+batch effect size, respectively.}
+
+\item{analysisApproach}{Character scalar. One of 'dontAdjust', 'inclBatch',
+'removeBatch', 'removeBatchAccCond'. Determines what model is fit to the
+data.}
+
+\item{seed}{Numeric scalar, the random seed to use when simulating data.}
 }
 \value{
 A shinyApp object

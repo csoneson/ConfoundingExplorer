@@ -2,6 +2,19 @@
 #'
 #' @author Charlotte Soneson
 #'
+#' @param sampleSizes 2x2 numeric matrix giving the number of samples in each
+#'   group. Row names must be c('group1', 'group2') and column names must be
+#'   c('batch1', 'batch2').
+#' @param fracVarCond,fracVarBatch Numeric scalars between 0 and 1.
+#'   The fraction of variables affected by the condition effect and batch
+#'   effect, respectively.
+#' @param condEffectSize,batchEffectSize Numeric scalars. The condition and
+#'   batch effect size, respectively.
+#' @param analysisApproach Character scalar. One of 'dontAdjust', 'inclBatch',
+#'   'removeBatch', 'removeBatchAccCond'. Determines what model is fit to the
+#'   data.
+#' @param seed Numeric scalar, the random seed to use when simulating data.
+#'
 #' @export
 #'
 #' @importFrom shiny sliderInput radioButtons numericInput fluidRow column
@@ -28,7 +41,32 @@
 #'   ConfoundingExplorer()
 #' }
 #'
-ConfoundingExplorer <- function() {
+ConfoundingExplorer <- function(
+    sampleSizes = matrix(rep(5, 4), nrow = 2,
+                         dimnames = list(c("group1", "group2"),
+                                         c("batch1", "batch2"))),
+    fracVarCond = 0.25,
+    fracVarBatch = 0.5,
+    condEffectSize = 3,
+    batchEffectSize = 3,
+    analysisApproach = "dontAdjust",
+    seed = 123) {
+
+    .checkInputArguments(sampleSizes = sampleSizes, fracVarCond = fracVarCond,
+                         fracVarBatch = fracVarBatch,
+                         condEffectSize = condEffectSize,
+                         batchEffectSize = batchEffectSize,
+                         analysisApproach = analysisApproach,
+                         seed = seed)
+
+    initAppr <-
+        switch(analysisApproach,
+               dontAdjust = "Don't account for batch effect",
+               inclBatch = "Include batch effect in model",
+               removeBatch = "Remove batch effect in advance",
+               removeBatchAccCond = paste0("Remove batch effect in advance,",
+                                           "\naccounting for condition"))
+
     ui <- shinydashboard::dashboardPage(
         skin = "red",
         shinyjs::useShinyjs(),
@@ -57,9 +95,7 @@ ConfoundingExplorer <- function() {
                     cols = list(
                         names = TRUE,
                         editableNames = FALSE),
-                    value = matrix(rep(5, 4), nrow = 2,
-                                   dimnames = list(c("group1", "group2"),
-                                                   c("batch1", "batch2")))
+                    value = sampleSizes
                 )
 
             ),
@@ -70,12 +106,12 @@ ConfoundingExplorer <- function() {
                 shiny::sliderInput(
                     "fraccond",
                     "Fraction of variables affected by condition:",
-                    min = 0, max = 1, value = 0.25
+                    min = 0, max = 1, value = fracVarCond
                 ),
                 shiny::sliderInput(
                     "fracbatch",
                     "Fraction of variables affected by batch:",
-                    min = 0, max = 1, value = 0.5
+                    min = 0, max = 1, value = fracVarBatch
                 )
             ),
             shinydashboard::menuItem(
@@ -84,11 +120,11 @@ ConfoundingExplorer <- function() {
 
                 shiny::sliderInput(
                     "condeffect", "Condition effect size:",
-                    min = 0, max = 10, step = 0.1, value = 3
+                    min = 0, max = 10, step = 0.1, value = condEffectSize
                 ),
                 shiny::sliderInput(
                     "batcheffect", "Batch effect size:",
-                    min = 0, max = 10, step = 0.1, value = 3
+                    min = 0, max = 10, step = 0.1, value = batchEffectSize
                 )
             ),
             shiny::radioButtons(
@@ -99,11 +135,11 @@ ConfoundingExplorer <- function() {
                             "Remove batch effect in advance",
                             paste0("Remove batch effect in advance,",
                                    "\naccounting for condition")),
-                selected = "Include batch effect in model"
+                selected = initAppr
             ),
 
             shiny::numericInput(
-                "seed", "Random seed", 123, min = 1, max = 1e8
+                "seed", "Random seed", seed, min = 1, max = 1e8
             ),
 
             shiny::actionButton("datadesc", "Data description")
