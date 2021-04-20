@@ -19,9 +19,10 @@
 #'
 #' @importFrom shiny sliderInput radioButtons numericInput fluidRow column
 #'   reactiveValues observe validate need renderPlot shinyApp div HTML tags
+#'   actionButton plotOutput eventReactive
 #' @importFrom ggplot2 ggplot geom_tile aes geom_point labs scale_x_discrete
 #'   scale_y_discrete scale_color_manual theme_bw theme element_text
-#'   geom_histogram
+#'   geom_histogram geom_boxplot geom_jitter facet_wrap
 #' @importFrom iSEE jitterSquarePoints
 #' @importFrom iCOBRA COBRAData calculate_adjp calculate_performance
 #'   fdrtpr fpr
@@ -33,6 +34,10 @@
 #' @importFrom grDevices rgb
 #' @importFrom shinyjs useShinyjs onclick
 #' @importFrom rintrojs introjs
+#' @importFrom dplyr group_by sample_n pull filter left_join select mutate
+#' @importFrom tibble rownames_to_column
+#' @importFrom tidyr gather
+#' @importFrom grDevices rgb
 #'
 #' @return A shinyApp object
 #'
@@ -233,6 +238,34 @@ ConfoundingExplorer <- function(
                         shiny::plotOutput("heatmapPlot")
                     )
                 )
+            ),
+            shiny::fluidRow(
+                shiny::column(
+                    width = 12,
+                    shinydashboard::box(
+                        id = "example_features",
+                        title = shiny::div(
+                            "Example features",
+                            shiny::HTML("&nbsp;"),
+                            shiny::div(id = "help_example_features",
+                                       style = "display: inline-block;",
+                                       shiny::tags$i(
+                                           class = "fa fa-question-circle",
+                                           style = "color: lightgrey"
+                                       )
+                            ),
+                            shiny::HTML("&nbsp;"),
+                            shiny::HTML("&nbsp;"),
+                            shiny::actionButton(inputId = "newExampleFeatures",
+                                                label = "New selection")
+                        ),
+                        width = NULL,
+                        shiny::checkboxInput(inputId = "colorExamplesByBatch",
+                                             label = "Color samples by batch",
+                                             value = TRUE),
+                        shiny::plotOutput("exampleFeaturesPlot", height = "23vh")
+                    )
+                )
             )
         )
     )
@@ -319,6 +352,59 @@ ConfoundingExplorer <- function(
                 show_column_names = FALSE, left_annotation = rowAnnot,
                 bottom_annotation = colAnnot, name = " "
             )
+        })
+
+        ## ----------------------------------------------------------------- ##
+        ## Boxplot of example features
+        ## ----------------------------------------------------------------- ##
+        ## Generate features to plot. Trigger new selection when data is
+        ## updated or button is clicked
+        feats <- shiny::eventReactive(
+            list(input$newExampleFeatures, datres$res), {
+                datres$res %>%
+                    dplyr::group_by(batchaff, condaff) %>%
+                    dplyr::sample_n(1) %>%
+                    dplyr::pull(feature)
+            }, ignoreInit = FALSE, ignoreNULL = FALSE)
+
+        output$exampleFeaturesPlot <- shiny::renderPlot({
+            shiny::validate(
+                shiny::need(!is.null(datres$m) & !is.null(datres$res),
+                            "Results could not be generated")
+            )
+            ## Get the data for the selected features
+            plotdata <- as.data.frame(datres$m) %>%
+                tibble::rownames_to_column("feature") %>%
+                dplyr::filter(feature %in% feats()) %>%
+                tidyr::gather(key = "sample", value = "value", -feature) %>%
+                dplyr::left_join(datres$res %>%
+                                     dplyr::select(feature, batchaff,
+                                                   condaff), by = "feature") %>%
+                dplyr::left_join(datres$annot, by = "sample") %>%
+                dplyr::mutate(categ = factor(paste0("batch", batchaff, ".cond",
+                                                    condaff),
+                                             levels = c("batchFALSE.condFALSE",
+                                                        "batchFALSE.condTRUE",
+                                                        "batchTRUE.condFALSE",
+                                                        "batchTRUE.condTRUE"))) %>%
+                dplyr::select(-batchaff, -condaff)
+            plt <- ggplot2::ggplot(plotdata, ggplot2::aes(x = cond, y = value)) +
+                ggplot2::geom_boxplot(outlier.size = -1) +
+                ggplot2::facet_wrap(~ categ, nrow = 1, drop = FALSE) +
+                ggplot2::theme_bw()
+            if (input$colorExamplesByBatch) {
+                plt <- plt +
+                    ggplot2::geom_jitter(size = 3, width = 0.2, height = 0,
+                                         ggplot2::aes(color = batch)) +
+                    ggplot2::scale_color_manual(values = c(
+                        B1 = grDevices::rgb(181, 24, 25, maxColorValue = 256),
+                        B2 = grDevices::rgb(37, 202, 67, maxColorValue = 256)
+                    ))
+            } else {
+                plt <- plt +
+                    ggplot2::geom_jitter(size = 3, width = 0.2, height = 0)
+            }
+            plt
         })
 
         ## ----------------------------------------------------------------- ##
@@ -435,6 +521,19 @@ ConfoundingExplorer <- function(
                 intro = paste("This plot shows a histogram of the nominal",
                               "pvalues (testing the null hypothesis that",
                               "there is no difference between conditions)."))
+            rintrojs::introjs(session, options = list(steps = ptour))
+        })
+
+        shinyjs::onclick("help_example_features", {
+            ptour <- data.frame(
+                element = "#example_features",
+                intro = paste("This plot shows the simulated values of up to ",
+                              "four randomly selected features. The panel",
+                              "titles indicates whether the feature is",
+                              "affected by batch and/or condition effects.",
+                              "If possible, one feature from each category is",
+                              "randomly sampled. Clicking the",
+                              "button samples a new set of features."))
             rintrojs::introjs(session, options = list(steps = ptour))
         })
 
