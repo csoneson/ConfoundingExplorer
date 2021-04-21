@@ -9,8 +9,11 @@ ConfoundingExplorer(
     c("batch1", "batch2"))),
   fracVarCond = 0.25,
   fracVarBatch = 0.5,
+  fracVarUnknown = 0,
   condEffectSize = 3,
   batchEffectSize = 3,
+  unknownEffectSize = 0,
+  unknownEffectType = "categorical",
   analysisApproach = "dontAdjust",
   seed = 123
 )
@@ -20,12 +23,15 @@ ConfoundingExplorer(
 group. Row names must be c('group1', 'group2') and column names must be
 c('batch1', 'batch2').}
 
-\item{fracVarCond, fracVarBatch}{Numeric scalars between 0 and 1.
-The fraction of variables affected by the condition effect and batch
-effect, respectively.}
+\item{fracVarCond, fracVarBatch, fracVarUnknown}{Numeric scalars between 0 and
+1. The fraction of variables affected by the condition effect, batch
+effect, and 'unknown' effect, respectively.}
 
-\item{condEffectSize, batchEffectSize}{Numeric scalars. The condition and
-batch effect size, respectively.}
+\item{condEffectSize, batchEffectSize, unknownEffectSize}{Numeric scalars.
+The condition, batch and 'unknown' effect size, respectively.}
+
+\item{unknownEffectType}{Character scalar, either 'categorical' or
+'continuous', representing the type of 'unknown' effect to add.}
 
 \item{analysisApproach}{Character scalar. One of 'dontAdjust', 'inclBatch',
 'removeBatch', 'removeBatchAccCond'. Determines what model is fit to the

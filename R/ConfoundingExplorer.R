@@ -5,11 +5,13 @@
 #' @param sampleSizes 2x2 numeric matrix giving the number of samples in each
 #'   group. Row names must be c('group1', 'group2') and column names must be
 #'   c('batch1', 'batch2').
-#' @param fracVarCond,fracVarBatch Numeric scalars between 0 and 1.
-#'   The fraction of variables affected by the condition effect and batch
-#'   effect, respectively.
-#' @param condEffectSize,batchEffectSize Numeric scalars. The condition and
-#'   batch effect size, respectively.
+#' @param fracVarCond,fracVarBatch,fracVarUnknown Numeric scalars between 0 and
+#'   1. The fraction of variables affected by the condition effect, batch
+#'   effect, and 'unknown' effect, respectively.
+#' @param condEffectSize,batchEffectSize,unknownEffectSize Numeric scalars.
+#'   The condition, batch and 'unknown' effect size, respectively.
+#' @param unknownEffectType Character scalar, either 'categorical' or
+#'   'continuous', representing the type of 'unknown' effect to add.
 #' @param analysisApproach Character scalar. One of 'dontAdjust', 'inclBatch',
 #'   'removeBatch', 'removeBatchAccCond'. Determines what model is fit to the
 #'   data.
@@ -34,7 +36,7 @@
 #' @importFrom grDevices rgb
 #' @importFrom shinyjs useShinyjs onclick
 #' @importFrom rintrojs introjs
-#' @importFrom dplyr group_by sample_n pull filter left_join select mutate
+#' @importFrom dplyr group_by sample_n pull filter left_join select mutate %>%
 #' @importFrom tibble rownames_to_column
 #' @importFrom tidyr gather
 #' @importFrom grDevices rgb
@@ -52,15 +54,21 @@ ConfoundingExplorer <- function(
                                          c("batch1", "batch2"))),
     fracVarCond = 0.25,
     fracVarBatch = 0.5,
+    fracVarUnknown = 0,
     condEffectSize = 3,
     batchEffectSize = 3,
+    unknownEffectSize = 0,
+    unknownEffectType = "categorical",
     analysisApproach = "dontAdjust",
     seed = 123) {
 
     .checkInputArguments(sampleSizes = sampleSizes, fracVarCond = fracVarCond,
                          fracVarBatch = fracVarBatch,
+                         fracVarUnknown = fracVarUnknown,
                          condEffectSize = condEffectSize,
                          batchEffectSize = batchEffectSize,
+                         unknownEffectSize = unknownEffectSize,
+                         unknownEffectType = unknownEffectType,
                          analysisApproach = analysisApproach,
                          seed = seed)
 
@@ -93,7 +101,7 @@ ConfoundingExplorer <- function(
                 shinyMatrix::matrixInput(
                     "sampleSizeTable",
                     class = "numeric",
-                    label = "Group sizes",
+                    label = "Group sizes (click outside the table for changes to take effect)",
                     rows = list(
                         names = TRUE,
                         editableNames = FALSE),
@@ -117,6 +125,11 @@ ConfoundingExplorer <- function(
                     "fracbatch",
                     "Fraction of variables affected by batch:",
                     min = 0, max = 1, value = fracVarBatch
+                ),
+                shiny::sliderInput(
+                    "fracunknown",
+                    "Fraction of variables affected by unknown variation:",
+                    min = 0, max = 1, value = fracVarUnknown
                 )
             ),
             shinydashboard::menuItem(
@@ -130,6 +143,15 @@ ConfoundingExplorer <- function(
                 shiny::sliderInput(
                     "batcheffect", "Batch effect size:",
                     min = 0, max = 10, step = 0.1, value = batchEffectSize
+                ),
+                shiny::sliderInput(
+                    "unknowneffect", "Unknown effect size:",
+                    min = 0, max = 10, step = 0.1, value = unknownEffectSize
+                ),
+                shiny::radioButtons(
+                    "unknowntype", "Unknown effect type",
+                    choices = c("categorical", "continuous"),
+                    selected = unknownEffectType, inline = TRUE
                 )
             ),
             shiny::radioButtons(
@@ -307,8 +329,11 @@ ConfoundingExplorer <- function(
                                  nb2c2 = input$sampleSizeTable[2, 2],
                                  fraccond = input$fraccond,
                                  fracbatch = input$fracbatch,
+                                 fracunknown = input$fracunknown,
                                  condeffect = input$condeffect,
                                  batcheffect = input$batcheffect,
+                                 unknowneffect = input$unknowneffect,
+                                 unknowntype = input$unknowntype,
                                  analysisapproach = input$analysisapproach,
                                  nvar = 1000, seed = input$seed)
             datres$res <- tmp$res

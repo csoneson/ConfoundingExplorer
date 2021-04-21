@@ -11,8 +11,11 @@
   nb2c2,
   fraccond,
   fracbatch,
+  fracunknown,
   condeffect,
   batcheffect,
+  unknowneffect,
+  unknowntype,
   analysisapproach,
   nvar,
   seed

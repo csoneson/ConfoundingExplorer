@@ -14,7 +14,9 @@ test_that("data generation works", {
     for (appr in analysis_approaches) {
         dat <- .generateData(nb1c1 = 5, nb1c2 = 5, nb2c1 = 5, nb2c2 = 5,
                              fraccond = 0.5, fracbatch = 0.5,
+                             fracunknown = 0,
                              condeffect = 2, batcheffect = 2,
+                             unknowneffect = 0, unknowntype = "categorical",
                              analysisapproach = appr,
                              nvar = 100, seed = 123)
         expect_type(dat, "list")
@@ -27,7 +29,9 @@ test_that("data generation works", {
 test_that("no p-values are calculated if adjusting with full confounding", {
     dat <- .generateData(nb1c1 = 5, nb1c2 = 0, nb2c1 = 0, nb2c2 = 5,
                          fraccond = 0.5, fracbatch = 0.5,
+                         fracunknown = 0,
                          condeffect = 2, batcheffect = 2,
+                         unknowneffect = 0, unknowntype = "categorical",
                          analysisapproach = "Include batch effect in model",
                          nvar = 100, seed = 123)
     expect_type(dat, "list")

@@ -1,7 +1,8 @@
 #' @importFrom  methods is
 .checkInputArguments <- function(sampleSizes, fracVarCond, fracVarBatch,
-                                 condEffectSize, batchEffectSize,
-                                 analysisApproach, seed) {
+                                 fracVarUnknown, condEffectSize,
+                                 batchEffectSize, unknownEffectSize,
+                                 unknownEffectType, analysisApproach, seed) {
     if (!methods::is(sampleSizes, "matrix")) {
         stop("sampleSizes must be a matrix")
     }
@@ -30,6 +31,10 @@
         fracVarBatch < 0 || fracVarBatch > 1) {
         stop("fracVarBatch must be a numeric scalar between 0 and 1")
     }
+    if (!is.numeric(fracVarUnknown) || length(fracVarUnknown) > 1 ||
+        fracVarUnknown < 0 || fracVarUnknown > 1) {
+        stop("fracVarUnknown must be a numeric scalar between 0 and 1")
+    }
 
     if (!is.numeric(condEffectSize) || length(condEffectSize) > 1 ||
         condEffectSize < 0) {
@@ -39,8 +44,17 @@
         batchEffectSize < 0) {
         stop("batchEffectSize must be a non-negative numeric scalar")
     }
+    if (!is.numeric(unknownEffectSize) || length(unknownEffectSize) > 1 ||
+        unknownEffectSize < 0) {
+        stop("unknownEffectSize must be a non-negative numeric scalar")
+    }
 
-    if (!is.character(analysisApproach) || length(analysisApproach) > 1 ||
+    if (!is.character(unknownEffectType) || length(unknownEffectType) != 1 ||
+        !(unknownEffectType %in% c("categorical", "continuous"))) {
+        stop("unknownEffectType must be one of 'categorical' or 'continuous'")
+    }
+
+    if (!is.character(analysisApproach) || length(analysisApproach) != 1 ||
         !(analysisApproach %in% c("dontAdjust", "inclBatch", "removeBatch",
                                   "removeBatchAccCond"))) {
         stop("analysisApproach must be one of 'dontAdjust', 'inclBatch',

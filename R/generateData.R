@@ -22,8 +22,8 @@
 #' @importFrom limma removeBatchEffect
 #'
 .generateData <- function(nb1c1, nb1c2, nb2c1, nb2c2, fraccond, fracbatch,
-                          condeffect, batcheffect, analysisapproach, nvar,
-                          seed) {
+                          fracunknown, condeffect, batcheffect, unknowneffect,
+                          unknowntype, analysisapproach, nvar, seed) {
     set.seed(seed)
     m <- matrix(stats::rnorm(n = (nb1c1 + nb1c2 + nb2c1 + nb2c2) * nvar,
                              mean = 10, sd = 2),
@@ -34,15 +34,34 @@
               rep("C1", nb2c1), rep("C2", nb2c2))
     batch <- c(rep("B1", nb1c1), rep("B1", nb1c2),
                rep("B2", nb2c1), rep("B2", nb2c2))
+    if (unknowntype == "categorical") {
+        unknown <- sample(c("U1", "U2"), nb1c1 + nb1c2 + nb2c1 + nb2c2,
+                          replace = TRUE)
+    } else {
+        unknown <- stats::runif(n = nb1c1 + nb1c2 + nb2c1 + nb2c2)
+    }
     condvar <- sample(seq_len(nvar), size = fraccond * nvar)
+    condsign <- rep("0", nvar)
     batchvar <- sample(seq_len(nvar), size = fracbatch * nvar)
+    batchsign <- rep("0", nvar)
+    unknownvar <- sample(seq_len(nvar), size = fracunknown * nvar)
     for (i in condvar) {
-        m[i, cond == "C2"] <- m[i, cond == "C2"] +
-            sign((stats::runif(1) < 0.5) - 0.5) * condeffect
+        sgn <- sign((stats::runif(1) < 0.5) - 0.5)
+        m[i, cond == "C2"] <- m[i, cond == "C2"] + sgn * condeffect
+        condsign[i] <- ifelse(sgn == 1, "pos", "neg")
     }
     for (i in batchvar) {
-        m[i, batch == "B2"] <- m[i, batch == "B2"] +
-            sign((stats::runif(1) < 0.5) - 0.5) * batcheffect
+        sgn <- sign((stats::runif(1) < 0.5) - 0.5)
+        m[i, batch == "B2"] <- m[i, batch == "B2"] + sgn * batcheffect
+        batchsign[i] <- ifelse(sgn == 1, "pos", "neg")
+    }
+    for (i in unknownvar) {
+        sgn <- sign((stats::runif(1) < 0.5) - 0.5)
+        if (unknowntype == "categorical") {
+            m[i, unknown == "U2"] <- m[i, unknown == "U2"] + sgn * unknowneffect
+        } else {
+            m[i, ] <- m[i, ] + sgn * unknowneffect * unknown
+        }
     }
     pvals <- tryCatch({
         if (analysisapproach == "Remove batch effect in advance") {
@@ -72,11 +91,14 @@
         error = function(e) rep(NA_real_, nvar))
     res <- data.frame(feature = rownames(m),
                       batchaff = seq_len(nvar) %in% batchvar,
+                      batchsign = batchsign,
                       condaff = seq_len(nvar) %in% condvar,
+                      condsign = condsign,
+                      unknownaff = seq_len(nvar) %in% unknownvar,
                       p.val = pvals,
                       p.adj = stats::p.adjust(pvals, method = "BH"),
                       row.names = rownames(m))
     annot <- data.frame(sample = colnames(m), batch = batch, cond = cond,
-                        row.names = colnames(m))
+                        unknown = unknown, row.names = colnames(m))
     return(list(m = m, res = res, annot = annot))
 }
