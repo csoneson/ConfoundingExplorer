@@ -83,7 +83,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">ConfoundingExplorer</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.3.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.4.0</span>
       </span>
     </div>
 
@@ -122,8 +122,11 @@
     <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"batch1"</span>, <span class='st'>"batch2"</span><span class='op'>)</span><span class='op'>)</span><span class='op'>)</span>,
   fracVarCond <span class='op'>=</span> <span class='fl'>0.25</span>,
   fracVarBatch <span class='op'>=</span> <span class='fl'>0.5</span>,
+  fracVarUnknown <span class='op'>=</span> <span class='fl'>0</span>,
   condEffectSize <span class='op'>=</span> <span class='fl'>3</span>,
   batchEffectSize <span class='op'>=</span> <span class='fl'>3</span>,
+  unknownEffectSize <span class='op'>=</span> <span class='fl'>0</span>,
+  unknownEffectType <span class='op'>=</span> <span class='st'>"categorical"</span>,
   analysisApproach <span class='op'>=</span> <span class='st'>"dontAdjust"</span>,
   seed <span class='op'>=</span> <span class='fl'>123</span>
 <span class='op'>)</span></pre>
@@ -138,15 +141,20 @@ group. Row names must be c('group1', 'group2') and column names must be
 c('batch1', 'batch2').</p></td>
     </tr>
     <tr>
-      <th>fracVarCond, fracVarBatch</th>
-      <td><p>Numeric scalars between 0 and 1.
-The fraction of variables affected by the condition effect and batch
-effect, respectively.</p></td>
+      <th>fracVarCond, fracVarBatch, fracVarUnknown</th>
+      <td><p>Numeric scalars between 0 and
+1. The fraction of variables affected by the condition effect, batch
+effect, and 'unknown' effect, respectively.</p></td>
     </tr>
     <tr>
-      <th>condEffectSize, batchEffectSize</th>
-      <td><p>Numeric scalars. The condition and
-batch effect size, respectively.</p></td>
+      <th>condEffectSize, batchEffectSize, unknownEffectSize</th>
+      <td><p>Numeric scalars.
+The condition, batch and 'unknown' effect size, respectively.</p></td>
+    </tr>
+    <tr>
+      <th>unknownEffectType</th>
+      <td><p>Character scalar, either 'categorical' or
+'continuous', representing the type of 'unknown' effect to add.</p></td>
     </tr>
     <tr>
       <th>analysisApproach</th>
