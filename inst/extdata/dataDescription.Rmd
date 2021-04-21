@@ -7,17 +7,23 @@ total sample size of 20). The base expression values are sampled independently f
 distribution with mean 10 and standard deviation 2. The random seed used for the simulation 
 can be changed by the user to generate a different matrix.
 
-Next, the variables affected by the condition and/or batch effects (denoted here by $C$ and 
-$B$, respectively) are sampled randomly among the full set of variables. The number of 
-variables affected by each type of effect is determined by the user. 
+Next, the variables affected by the condition, batch or 'unknown' effects 
+(denoted here by $C$, $B$ and %$U$, respectively) are sampled randomly among the full set of
+variables. The number of variables affected by each type of effect is determined by the user. 
 
 For each variable in $C$, the base expression for the samples in condition c2 is either 
 increased or decreased by the indicated condition effect size, determined by the user. The 
 sign of the effect is randomly determined. Similarly, for each variable in $B$, the base
 expression for the samples in batch b2 is either increased or decreased by the indicated 
-batch effect size. 
+batch effect size. For each variable in $U$, if the unknown effect is designed to be 
+categorical, samples are randomly split into two groups and the base expression for the 
+samples in the second group is either increased or decreased by the indicated unknown 
+effect size. If the unknown effect is designed to be continuous, each sample is randomly 
+assigned a covariate value between 0 and 1, and the base expression is either increased 
+or decreased by this covariate value times the indicated unknown effect size. 
 
-More formally, let $y_{ij}^0\in N(10,2)$ denote the base expression level of variable $i$ 
+More formally (here excluding the unknown effect for simplicity), 
+let $y_{ij}^0\in N(10,2)$ denote the base expression level of variable $i$ 
 in sample $j$. Furthermore, let $S_{b2}$ denote the set of samples from batch $b2$, and 
 similarly let $S_{c2}$ denote the set of samples from condition $c2$. Finally, let $C$ 
 denote the set of variables affected by the condition, and $B$ the set of variables affected
