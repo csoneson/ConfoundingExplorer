@@ -257,6 +257,12 @@ ConfoundingExplorer <- function(
                         ),
                         # title = "Data heatmap",
                         width = NULL,
+                        shiny::radioButtons("columnorder", "Order features by:",
+                                            choices = c("clustering",
+                                                        "batch-affected",
+                                                        "cond-affected"),
+                                            selected = "clustering",
+                                            inline = TRUE),
                         shiny::plotOutput("heatmapPlot")
                     )
                 )
@@ -349,14 +355,30 @@ ConfoundingExplorer <- function(
                 shiny::need(!is.null(datres$m) & !is.null(datres$res),
                             "Results could not be generated")
             )
-            colAnnot <- ComplexHeatmap::columnAnnotation(
-                batch = datres$res$batchaff,
-                cond = datres$res$condaff,
-                col = list(
-                    batch = c(`TRUE` = "forestgreen", `FALSE` = "grey85"),
-                    cond = c(`TRUE` = "purple", `FALSE` = "grey85")
+
+            if (!any(is.na(datres$res$p.adj))) {
+                ## Valid p-values available - add them to heatmap annotation
+                colAnnot <- ComplexHeatmap::columnAnnotation(
+                    batch = datres$res$batchaff,
+                    cond = datres$res$condaff,
+                    condsignif = datres$res$p.adj <= 0.05,
+                    col = list(
+                        batch = c(`TRUE` = "forestgreen", `FALSE` = "grey85"),
+                        cond = c(`TRUE` = "purple", `FALSE` = "grey85"),
+                        condsignif = c(`TRUE` = "red", `FALSE` = "grey85")
+                    )
                 )
-            )
+            } else {
+                ## No valid p-values available
+                colAnnot <- ComplexHeatmap::columnAnnotation(
+                    batch = datres$res$batchaff,
+                    cond = datres$res$condaff,
+                    col = list(
+                        batch = c(`TRUE` = "forestgreen", `FALSE` = "grey85"),
+                        cond = c(`TRUE` = "purple", `FALSE` = "grey85")
+                    )
+                )
+            }
             rowAnnot <- ComplexHeatmap::rowAnnotation(
                 batch = datres$annot$batch,
                 cond = datres$annot$cond,
@@ -372,10 +394,29 @@ ConfoundingExplorer <- function(
                 )
             )
 
+            ## Determine column order
+            if (input$columnorder == "clustering") {
+                column_order <- NULL
+                cluster_columns <- TRUE
+            } else if (input$columnorder == "batch-affected") {
+                column_order <- order(paste0(datres$res$batchaff,
+                                             datres$res$batchsign),
+                                      paste0(datres$res$condaff,
+                                             datres$res$condsign))
+                cluster_columns <- FALSE
+            } else if (input$columnorder == "cond-affected") {
+                column_order <- order(paste0(datres$res$condaff,
+                                             datres$res$condsign),
+                                      paste0(datres$res$batchaff,
+                                             datres$res$batchsign))
+                cluster_columns <- FALSE
+            }
+
             ComplexHeatmap::Heatmap(
                 t(datres$m), use_raster = TRUE,
                 show_column_names = FALSE, left_annotation = rowAnnot,
-                bottom_annotation = colAnnot, name = " "
+                bottom_annotation = colAnnot, name = " ",
+                column_order = column_order, cluster_columns = cluster_columns
             )
         })
 

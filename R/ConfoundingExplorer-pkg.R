@@ -8,4 +8,5 @@
 NULL
 
 globalVariables(c("X", "Y", "jitteredX", "jitteredY",
-                  "p.val", "p.adj", "XWidth", "YWidth"))
+                  "p.val", "p.adj", "XWidth", "YWidth",
+                  "batch", "batchaff", "cond", "condaff", "feature", "value"))
