@@ -45,6 +45,7 @@
     batchvar <- sample(seq_len(nvar), size = fracbatch * nvar)
     batchsign <- rep("0", nvar)
     unknownvar <- sample(seq_len(nvar), size = fracunknown * nvar)
+    unknownsign <- rep("0", nvar)
     for (i in condvar) {
         sgn <- sign((stats::runif(1) < 0.5) - 0.5)
         m[i, cond == "C2"] <- m[i, cond == "C2"] + sgn * condeffect
@@ -62,6 +63,7 @@
         } else {
             m[i, ] <- m[i, ] + sgn * unknowneffect * unknown
         }
+        unknownsign[i] <- ifelse(sgn == 1, "pos", "neg")
     }
     pvals <- tryCatch({
         if (analysisapproach == "Remove batch effect in advance") {
@@ -95,6 +97,7 @@
                       condaff = seq_len(nvar) %in% condvar,
                       condsign = condsign,
                       unknownaff = seq_len(nvar) %in% unknownvar,
+                      unknownsign = unknownsign,
                       p.val = pvals,
                       p.adj = stats::p.adjust(pvals, method = "BH"),
                       row.names = rownames(m))

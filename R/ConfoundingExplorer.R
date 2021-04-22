@@ -356,32 +356,32 @@ ConfoundingExplorer <- function(
                             "Results could not be generated")
             )
 
+            colAnnotDf <- data.frame(batch = datres$res$batchaff,
+                                     cond = datres$res$condaff,
+                                     row.names = rownames(datres$res))
+
             if (!any(is.na(datres$res$p.adj))) {
                 ## Valid p-values available - add them to heatmap annotation
-                colAnnot <- ComplexHeatmap::columnAnnotation(
-                    batch = datres$res$batchaff,
-                    cond = datres$res$condaff,
-                    condsignif = datres$res$p.adj <= 0.05,
-                    col = list(
-                        batch = c(`TRUE` = "forestgreen", `FALSE` = "grey85"),
-                        cond = c(`TRUE` = "purple", `FALSE` = "grey85"),
-                        condsignif = c(`TRUE` = "red", `FALSE` = "grey85")
-                    )
-                )
-            } else {
-                ## No valid p-values available
-                colAnnot <- ComplexHeatmap::columnAnnotation(
-                    batch = datres$res$batchaff,
-                    cond = datres$res$condaff,
-                    col = list(
-                        batch = c(`TRUE` = "forestgreen", `FALSE` = "grey85"),
-                        cond = c(`TRUE` = "purple", `FALSE` = "grey85")
-                    )
-                )
+                colAnnotDf$condsignif <- datres$res$p.adj <= 0.05
             }
+            if (any(datres$res$unknownaff)) {
+                colAnnotDf$unknown <- datres$res$unknownaff
+            }
+            colAnnot <- ComplexHeatmap::columnAnnotation(
+                df = colAnnotDf,
+                col = list(
+                    batch = c(`TRUE` = "forestgreen", `FALSE` = "grey85"),
+                    cond = c(`TRUE` = "purple", `FALSE` = "grey85"),
+                    condsignif = c(`TRUE` = "red", `FALSE` = "grey85"),
+                    unknown = c(`TRUE` = "steelblue", `FALSE` = "grey85")
+                )
+            )
+
+            rowAnnotDf <- data.frame(batch = datres$annot$batch,
+                                     cond = datres$annot$cond,
+                                     row.names = rownames(datres$annot))
             rowAnnot <- ComplexHeatmap::rowAnnotation(
-                batch = datres$annot$batch,
-                cond = datres$annot$cond,
+                df = rowAnnotDf,
                 col = list(
                     batch = c(
                         B1 = grDevices::rgb(181, 24, 25, maxColorValue = 256),
@@ -402,13 +402,17 @@ ConfoundingExplorer <- function(
                 column_order <- order(paste0(datres$res$batchaff,
                                              datres$res$batchsign),
                                       paste0(datres$res$condaff,
-                                             datres$res$condsign))
+                                             datres$res$condsign),
+                                      paste0(datres$res$unknownaff,
+                                             datres$res$unknownsign))
                 cluster_columns <- FALSE
             } else if (input$columnorder == "cond-affected") {
                 column_order <- order(paste0(datres$res$condaff,
                                              datres$res$condsign),
                                       paste0(datres$res$batchaff,
-                                             datres$res$batchsign))
+                                             datres$res$batchsign),
+                                      paste0(datres$res$unknownaff,
+                                             datres$res$unknownsign))
                 cluster_columns <- FALSE
             }
 
