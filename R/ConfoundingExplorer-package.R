@@ -3,9 +3,9 @@
 #' ConfoundingExplorer is an R package for exploring the impact of confounding
 #' between a condition of interest and a batch variable.
 #'
-#' @name ConfoundingExplorer-pkg
-#' @docType package
-NULL
+#' @keywords internal
+#' @aliases ConfoundingExplorer-package NULL
+"_PACKAGE"
 
 globalVariables(c("X", "Y", "jitteredX", "jitteredY",
                   "p.val", "p.adj", "XWidth", "YWidth",
