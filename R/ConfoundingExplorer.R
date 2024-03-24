@@ -21,7 +21,7 @@
 #'
 #' @importFrom shiny sliderInput radioButtons numericInput fluidRow column
 #'   reactiveValues observe validate need renderPlot shinyApp div HTML tags
-#'   actionButton plotOutput eventReactive
+#'   actionButton plotOutput eventReactive stopApp observeEvent
 #' @importFrom ggplot2 ggplot geom_tile aes geom_point labs scale_x_discrete
 #'   scale_y_discrete scale_color_manual theme_bw theme element_text
 #'   geom_histogram geom_boxplot geom_jitter facet_wrap
@@ -169,7 +169,8 @@ ConfoundingExplorer <- function(
                 "seed", "Random seed", seed, min = 1, max = 1e8
             ),
 
-            shiny::actionButton("datadesc", "Data description")
+            shiny::actionButton("datadesc", "Data description"),
+            shiny::actionButton("close_app", "Close app")
         ),
 
         body = shinydashboard::dashboardBody(
@@ -300,6 +301,14 @@ ConfoundingExplorer <- function(
 
     #nocov start
     server <- function(input, output, session) {
+
+        ## Close app
+        shiny::observeEvent(input$close_app, {
+            shiny::stopApp(returnValue = list(
+                res = datres$res, m = datres$m,
+                annot = datres$annot
+            ))
+        })
 
         ## Display data generation description
         shiny::observeEvent(input$datadesc, {
@@ -513,7 +522,7 @@ ConfoundingExplorer <- function(
                 ) +
                 ggplot2::theme_bw() +
                 ggplot2::theme(legend.position = 'bottom',
-                               legend.text = ggplot2::element_text(size=9),
+                               legend.text = ggplot2::element_text(size = 9),
                                legend.title = ggplot2::element_text(size = 11),
                                legend.box = 'vertical',
                                axis.text = ggplot2::element_text(size = 12),
@@ -568,7 +577,7 @@ ConfoundingExplorer <- function(
         })
 
         ## ----------------------------------------------------------------- ##
-        ## Help textx
+        ## Help text
         ## ----------------------------------------------------------------- ##
         shinyjs::onclick("help_statistical_test_results", {
             ptour <- data.frame(
