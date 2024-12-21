@@ -15,7 +15,8 @@ ConfoundingExplorer(
   unknownEffectSize = 0,
   unknownEffectType = "categorical",
   analysisApproach = "dontAdjust",
-  seed = 123
+  seed = 123,
+  addStopButton = TRUE
 )
 }
 \arguments{
@@ -38,6 +39,9 @@ The condition, batch and 'unknown' effect size, respectively.}
 data.}
 
 \item{seed}{Numeric scalar, the random seed to use when simulating data.}
+
+\item{addStopButton}{Logical scalar. If \code{TRUE} (default), will add a
+button to stop the app (by calling \code{shiny::stopApp}).}
 }
 \value{
 A shinyApp object

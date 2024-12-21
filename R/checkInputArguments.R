@@ -2,7 +2,8 @@
 .checkInputArguments <- function(sampleSizes, fracVarCond, fracVarBatch,
                                  fracVarUnknown, condEffectSize,
                                  batchEffectSize, unknownEffectSize,
-                                 unknownEffectType, analysisApproach, seed) {
+                                 unknownEffectType, analysisApproach, seed,
+                                 addStopButton) {
     if (!methods::is(sampleSizes, "matrix")) {
         stop("sampleSizes must be a matrix")
     }
@@ -63,6 +64,10 @@
 
     if (!is.numeric(seed) || length(seed) > 1 || seed <= 0) {
         stop("seed must be a positive numeric scalar")
+    }
+
+    if (!is.logical(addStopButton) || length(addStopButton) != 1) {
+        stop("addStopButton must be a logical scalar")
     }
 
 }

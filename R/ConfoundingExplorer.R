@@ -16,6 +16,8 @@
 #'   'removeBatch', 'removeBatchAccCond'. Determines what model is fit to the
 #'   data.
 #' @param seed Numeric scalar, the random seed to use when simulating data.
+#' @param addStopButton Logical scalar. If \code{TRUE} (default), will add a
+#'   button to stop the app (by calling \code{shiny::stopApp}).
 #'
 #' @export
 #'
@@ -60,7 +62,8 @@ ConfoundingExplorer <- function(
     unknownEffectSize = 0,
     unknownEffectType = "categorical",
     analysisApproach = "dontAdjust",
-    seed = 123) {
+    seed = 123,
+    addStopButton = TRUE) {
 
     .checkInputArguments(sampleSizes = sampleSizes, fracVarCond = fracVarCond,
                          fracVarBatch = fracVarBatch,
@@ -70,7 +73,7 @@ ConfoundingExplorer <- function(
                          unknownEffectSize = unknownEffectSize,
                          unknownEffectType = unknownEffectType,
                          analysisApproach = analysisApproach,
-                         seed = seed)
+                         seed = seed, addStopButton = addStopButton)
 
     initAppr <-
         switch(analysisApproach,
@@ -170,7 +173,8 @@ ConfoundingExplorer <- function(
             ),
 
             shiny::actionButton("datadesc", "Data description"),
-            shiny::actionButton("close_app", "Close app")
+
+            shiny::uiOutput("close_app_ui")
         ),
 
         body = shinydashboard::dashboardBody(
@@ -302,6 +306,13 @@ ConfoundingExplorer <- function(
     #nocov start
     server <- function(input, output, session) {
 
+        output$close_app_ui <- shiny::renderUI({
+            if (addStopButton) {
+                shiny::actionButton("close_app", "Close app")
+            } else {
+                NULL
+            }
+        })
         ## Close app
         shiny::observeEvent(input$close_app, {
             shiny::stopApp(returnValue = list(

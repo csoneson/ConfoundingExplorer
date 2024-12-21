@@ -33,7 +33,7 @@ Imports:
     tidyr,
     dplyr,
     tibble
-RoxygenNote: 7.3.1
+RoxygenNote: 7.3.2
 biocViews: Regression, ExperimentalDesign, MultipleComparison, BatchEffect
 Suggests: 
     testthat (>= 3.0.0)
